@@ -8,7 +8,7 @@ Here, you will find:
 
 The RMarkdown file, as well as the Knitted HTML file from the RMarkdown, that covers the total analysis from all the datasets as well as the respective outputs and plots.
 
-The data set used for the analysis (CaseStudy2-data.csv).
+The data set used for the analysis (CaseStudy2-data.csv).   
 The data set used to predict attrition (CaseStudy2NoAttrition.csv).
 The data set where the predicted output for attrition was posted (Case2PredictionsKattaAttrition.csv).
 The data set used to predict salary (CaseStudy2NoSalary.csv).
