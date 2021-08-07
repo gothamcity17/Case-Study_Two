@@ -12,7 +12,7 @@ Here, you will find:
 4. The data set where the predicted output for attrition was posted (Case2PredictionsKattaAttrition.csv).    
 5. The data set used to predict salary (CaseStudy2NoSalary.csv).   
 6. The data set where the predicted output for salary was posted (Case2PredictionsKattaSalary.csv).    
-7. The PowerPoint used for the presentation. Note: the PowerPoint was posted as a PDF due to the size of the orginal file.   
-8.The presentation found on Youtube:  
+7. The PowerPoint used for the presentation. Note: the PowerPoint was posted as a PDF due to the size of the orginal file.
+8. The presentation found on Youtube:  
 
 Hope you enjoy the presentation!    
