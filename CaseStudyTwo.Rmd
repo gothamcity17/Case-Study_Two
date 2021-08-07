@@ -1,0 +1,238 @@
+---
+title: "CaseStudyTwo"
+author: "Gowtham Katta"
+date: "8/7/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+This RMarkdown is the analysis of Atrrition and Monthly Income determined from the Frito Lay data sets. These data sets include continuous and categorical variables such as: Age, Gender, Department, Job Role, Attrition, and Monthly Income (to name a few). The analysis will be comprehensive and cover aspects of descriptive statistics and prediction algorithms. An explanation and analysis to certain questions will be explained with visuals.
+
+
+```{r}
+
+library(magrittr)
+library(dplyr)
+library(tidyverse)
+library(class)
+library(data.table)
+library(caret)
+library(ggplot2)
+library(reshape2)
+library(e1071)
+library(GGally)
+
+Frito = read.csv("/Users/gowthamkatta/Desktop/Case Study 2/CaseStudy2-data.csv")
+
+```
+
+
+Question: How would you describe the company?
+
+Answer: Employees are constituted in 3 departments: Human Resources, Research & Development, and Sales. These employees come from 5 unique educational backgrounds; Human Resources, Life Sciences, Marketing, Medical, and Technical. Most employees come from a Life Sciences department, which has as many as 358 people and the least come from Human Resources, which as as little as 15.
+
+
+```{r}
+
+# Company comprises of 3 Departments
+ggplot(Frito, aes(x = Department)) + geom_bar() + ylab("Number of Employees") + 
+  ggtitle("Employees in Each Department") + geom_text(aes(label = ..count..), stat = "count", vjust = -0.5) +
+  theme(plot.title = element_text(hjust = 0.5))
+
+# And employees come from 5 different background
+ggplot(Frito, aes(x = EducationField)) + geom_bar() + ylab("Number of Employees") + 
+  ggtitle("Employees from Each Field") + geom_text(aes(label = ..count..), stat = "count", vjust = -0.5) +
+  theme(plot.title = element_text(hjust = 0.5))
+
+```
+
+
+Question: What is employee attrition and how is it affecting the company?
+
+Answer: Employee attrition is a huge problem. Out of a total of 870 employees, 730 stay with the company while 140 leave the company. The amount employees who leave is 16.09% percent, which is almost a fifth of the company!
+
+
+```{r}
+
+# Attrition Rate = 16.09%, how can we lower this?
+ggplot(Frito, aes(x = Attrition)) + geom_bar() + ylab("Number of Employees") + 
+  ggtitle("Employee Attrition") + geom_text(aes(label = ..count..), stat = "count", vjust = -0.5) + theme(plot.title = element_text(hjust = 0.5))
+
+```
+
+
+Question: What are the top three factors that affect attrition?
+
+Answer: One factor that affects attrition is Age. Younger employees have a higher attrition rate. The mean age of the those who leave is 33.79 while that of those who stay is 37.41. Although the spread is very similar, this range is much higher in the no attrition group.
+
+
+```{r}
+
+# One factor is Age
+ggplot(Frito, aes(y = Age, x = Attrition, fill = Attrition)) + geom_boxplot() +
+  ggtitle("Age vs Attrition") + theme(plot.title = element_text(hjust = 0.5))
+
+No_Attrition <- Frito %>% filter(Attrition == "No")
+summary(No_Attrition$Age)
+
+Yes_Attrition <- Frito %>% filter(Attrition == "Yes")
+summary(Yes_Attrition$Age)
+
+```
+
+
+Question: What are the top three factors that affect attrition?
+
+Answer: Another factor that affects attrition is Monthly Income. Another factor is the monthly income that employees receive. Here, you can see that the median monthly income of those who stay is greater than those who leave.  Furthermore, the mean monthly income of those who stay us significantly higher than those who leave.
+ 
+
+```{r}
+
+# Second factor is Monthly Income
+Frito %>% select(Attrition, MonthlyIncome) %>% ggpairs(aes(color = Attrition))
+
+summary(No_Attrition$MonthlyIncome)
+summary(Yes_Attrition$MonthlyIncome)
+
+```
+
+
+Question: What are the top three factors that affect attrition?
+
+Answer: Another factor that affects attrition is Distance from Home. Employees who live further away have have a higher attrition rate. The mean distance of the those who leave is 10.96 while that of those who stay is 9.029. The spread of the distance is more in those who leave compared to those who stay, meaning that on average they live further away.
+
+
+```{r}
+
+# Third factor is Distance from Home
+ggplot(Frito, aes(y = DistanceFromHome, x = Attrition, fill = Attrition)) + geom_boxplot() +
+  ggtitle("Distance from Home vs Attrition") + theme(plot.title = element_text(hjust = 0.5))
+
+summary(No_Attrition$DistanceFromHome)
+summary(Yes_Attrition$DistanceFromHome)
+
+```
+
+
+Question: What are some specific trends that you observed?
+
+Answer: Although it appears as though Research & Development has the highest number of employee attrition. When you compare by individual groups, those in Sales, such as those in roles Sales Representative and Sales Executive, have a higher attrition rate. Sales has 273 employees and an attrition rate of 21.61%. While Research & Development has 562 employees and an attrition rate of 13.35%
+
+
+```{r}
+
+# Another factor could be Department
+ggplot(Frito, aes(x = Department, fill = Attrition)) + geom_bar(position = "dodge") + 
+  geom_text(aes(label = round(..count../sum(..count..)*100, 2)), position = position_dodge(width=0.9), stat = "count", vjust = -0.5) +
+  ylab("Number of Employees") + ggtitle("Attrition vs Department") + 
+  theme(plot.title = element_text(hjust = 0.5))
+
+```
+
+
+Question: What are some job specific trends?
+
+Answer: When comparing the Job Roles of Sales Representatives (from the Sales Department) and Research Scientist (from the Research & Development Department), the median Age of Sales Representatives was younger than that of Research Scientists.
+
+
+```{r}
+
+Frito %>% filter(JobRole == "Sales Representative" | JobRole == "Research Scientist") %>%
+  select(JobRole, Age) %>% ggpairs(aes(color = JobRole))
+
+```
+
+
+Question: What are some job specific trends (cont.)?
+
+Answer: When comparing the two Job Roles as well, the spread of the Monthly Income of Sales Representatives was much lower than that of Research Scientists.
+
+
+```{r}
+
+# Sales Representatives have lower Monthly Income
+Frito %>% filter(JobRole == "Sales Representative" | JobRole == "Research Scientist") %>%
+  select(MonthlyIncome, JobRole) %>% ggpairs(aes(color = JobRole))
+
+```
+
+
+Question: What are some job specific trends (cont.)?
+
+Answer: Again, when comparing the two Job Roles, there appeared to be a significantly lower range in the spread of Environment Satisfaction from Sales Representatives compared to that of Research Scientists. The median Environment Satisfaction did appear to be similar in both Job Roles, but this may be due to only having a rating score between 1 to 5, which limited the reponses some employees may give.
+
+
+```{r}
+
+# Sales Representatives have lower Environment Satisfaction
+Frito %>% filter(Department == "Sales" | Department == "Research & Development") %>%
+  select(Department, PercentSalaryHike) %>% ggpairs(aes(color = Department))
+
+```
+
+
+Question: How well can we predict Attrition?
+
+Answer: Using Naive Bayes classifier, the model performed with an accuracy of 60.92%, a sensitivity of 60.91%, and a specificity of 60.98% to classify various between those who stayed (No Attrition) and those who leaved (Yes Attrition). We are 95% confident that we can accurately predicted attrition with an accuracy falling between the interval (54.71%, 66.88%).
+
+
+```{r}
+
+NewFrito <- Frito
+
+set.seed(1)
+splitPerc = 0.70
+
+TrainIndices = sample(1:nrow(NewFrito), splitPerc * nrow(NewFrito))
+TrainAttrition = NewFrito[TrainIndices,]
+TestAttrition =  NewFrito[-TrainIndices,]
+
+model = naiveBayes(TrainAttrition[,c(2,6,7,16,17,20,36)], TrainAttrition$Attrition, laplace = 32)
+
+table(predict(model, TrainAttrition[,c(2,6,7,16,17,20,36)]), TrainAttrition$Attrition)
+
+table(predict(model,TestAttrition[,c(2,6,7,16,17,20,36)]), TestAttrition$Attrition)
+
+ConfusionM = confusionMatrix(table(predict(model,TestAttrition[,c(2,6,7,16,17,20,36)]), TestAttrition$Attrition))
+
+ConfusionM
+
+```
+
+
+Question: How well can we predict Monthly Income?
+
+Answer: Using a Multiple Linear Regression model, we were able to attain a RMSE (root mean squared error) of 1354.42. This value represents on average how much our predicted estimated will be different from the observed estimated. The explanatory variables used to predict the response variable (Monthly Income) were: Job Level, Total Working Years, and Years with Current Manager.
+
+
+```{r}
+
+set.seed(1)
+splitPerc = 0.70
+
+TrainIndices = sample(1:nrow(Frito), splitPerc * nrow(Frito))
+TrainSalary = Frito[TrainIndices,]
+TestSalary = Frito[-TrainIndices,]
+
+Model_fit = lm(MonthlyIncome ~ JobLevel + TotalWorkingYears + YearsWithCurrManager, data = TrainSalary)
+summary(Model_fit)
+
+
+Model_preds = predict(Model_fit, newdata = TestSalary)
+
+RMSE = mean((TestSalary$MonthlyIncome - Model_preds)^2) %>% sqrt()
+RMSE
+
+FritoNoSalary = read.csv("/Users/gowthamkatta/Desktop/Case Study 2/CaseStudy2No Salary.csv")
+
+Model2_preds = predict(Model_fit, newdata = FritoNoSalary)
+
+```
